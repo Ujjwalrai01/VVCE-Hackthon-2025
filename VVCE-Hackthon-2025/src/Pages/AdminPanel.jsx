@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import Image from "../assets/img1.png"
 import { User, FileText, Check, X, Settings, Menu, LogOut, Edit, Save, ChevronRight, MoreVertical } from 'lucide-react';
 
 const AdminPanel = () => {
@@ -11,10 +12,10 @@ const AdminPanel = () => {
   
   // Admin profile state
   const [profile, setProfile] = useState({
-    name: "Admin User",
-    email: "admin@example.com",
+    name: "Ujjwal Rai",
+    email: "ujjwal@example.com",
     role: "Super Admin",
-    avatar: "/api/placeholder/80/80"
+    avatar: {Image}
   });
   
   const [editingProfile, setEditingProfile] = useState(false);
@@ -147,7 +148,7 @@ const AdminPanel = () => {
 
   // Admin Profile Component
   const AdminProfile = () => (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white-200 rounded-lg shadow">
       <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
         <h3 className="text-lg font-medium text-gray-900">Admin Profile</h3>
         {!editingProfile ? (
@@ -155,7 +156,7 @@ const AdminPanel = () => {
             onClick={() => setEditingProfile(true)}
             className="flex items-center text-sm px-3 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100"
           >
-            <Edit className="h-4 w-4 mr-1" />
+            <Edit className="h-4 w-4 mr-1 text-gray-600" />
             Edit
           </button>
         ) : (
@@ -163,15 +164,15 @@ const AdminPanel = () => {
             onClick={saveProfile}
             className="flex items-center text-sm px-3 py-1 rounded-md bg-green-50 text-green-600 hover:bg-green-100"
           >
-            <Save className="h-4 w-4 mr-1" />
+            <Save className="h-4 w-4 mr-1 text-gray-600" />
             Save
           </button>
         )}
       </div>
       
-      <div className="p-6">
-        <div className="flex items-start">
-          <div className="flex-shrink-0">
+      <div className="p-6 text-gray-600">
+        <div className="flex items-start text-gray-600">
+          <div className="flex-shrink-0 text-gray-600">
             <img 
               src={profile.avatar} 
               alt="Admin Avatar" 
@@ -179,9 +180,9 @@ const AdminPanel = () => {
             />
           </div>
           
-          <div className="ml-6 flex-1">
+          <div className="ml-6 flex-1 text-gray-600">
             {editingProfile ? (
-              <div className="space-y-4">
+              <div className="space-y-4 text-gray-600">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Full Name</label>
                   <input
@@ -189,7 +190,7 @@ const AdminPanel = () => {
                     name="name"
                     value={editedProfile.name}
                     onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border text-gray-600"
                   />
                 </div>
                 
