@@ -1244,88 +1244,189 @@
 
 
 
-import React, { useState } from 'react';
-import Report from './Report';
-import { FaTachometerAlt, FaFileAlt } from 'react-icons/fa';
+// import React, { useState } from 'react';
+// import Report from './Report';
+// import { FaTachometerAlt, FaFileAlt } from 'react-icons/fa';
 
-const SidebarItem = ({ icon, label, onClick, isActive }) => (
-  <div
-    onClick={onClick}
-    className={`flex items-center space-x-3 text-white py-3 px-5 hover:bg-blue-700 cursor-pointer rounded-xl ${
-      isActive ? 'bg-blue-700' : ''
-    }`}
-  >
-    {icon}
-    <span>{label}</span>
-  </div>
-);
+// const SidebarItem = ({ icon, label, onClick, isActive }) => (
+//   <div
+//     onClick={onClick}
+//     className={`flex items-center space-x-3 text-white py-3 px-5 hover:bg-blue-700 cursor-pointer rounded-xl ${
+//       isActive ? 'bg-blue-700' : ''
+//     }`}
+//   >
+//     {icon}
+//     <span>{label}</span>
+//   </div>
+// );
+
+// const UserDashboard = () => {
+//   const [activeSection, setActiveSection] = useState('Dashboard');
+
+//   const renderSection = () => {
+//     switch (activeSection) {
+//       case 'Report':
+//         return <Report />;
+//       case 'Dashboard':
+//       default:
+//         return (
+//           <div className="bg-white rounded-xl p-6 shadow-md">
+//             <h2 className="text-2xl font-semibold text-blue-600 mb-4">📌 Dashboard Overview</h2>
+//             <p className="text-gray-600">
+//               Welcome to your user dashboard! Here you can view summaries, access reports, and monitor important updates.
+//             </p>
+//           </div>
+//         );
+//     }
+//   };
+
+//   return (
+//     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 font-sans">
+//       {/* Sidebar */}
+//       <div className="w-full lg:w-64 bg-blue-500 text-white p-5 space-y-6">
+//         <SidebarItem
+//           icon={<FaTachometerAlt />}
+//           label="Dashboard"
+//           onClick={() => setActiveSection('Dashboard')}
+//           isActive={activeSection === 'Dashboard'}
+//         />
+//         <SidebarItem
+//           icon={<FaFileAlt />}
+//           label="Report"
+//           onClick={() => setActiveSection('Report')}
+//           isActive={activeSection === 'Report'}
+//         />
+//       </div>
+
+//       {/* Main Content */}
+//       <div className="flex-1 p-4 md:p-8">
+//         {/* Header */}
+//         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+//           <h1 className="text-2xl font-semibold text-blue-600">{activeSection}</h1>
+//           <div className="flex items-center space-x-4 mt-4 md:mt-0">
+//             <input
+//               type="text"
+//               placeholder="Search..."
+//               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-600"
+//             />
+//             <img
+//               src="https://i.pravatar.cc/40?img=11"
+//               alt="avatar"
+//               className="w-10 h-10 rounded-full border-2 border-blue-400"
+//             />
+//           </div>
+//         </div>
+
+//         {renderSection()}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UserDashboard;
+
+
+
+
+import React, { useState } from 'react';
+import { Pencil, Save, AlertTriangle, Activity, ShieldCheck } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const UserDashboard = () => {
-  const [activeSection, setActiveSection] = useState('Dashboard');
+  const [editMode, setEditMode] = useState(false);
+  const [profile, setProfile] = useState({
+    name: 'Ujjwal Rai',
+    email: 'urai31382@gmail.com',
+    location: 'Mysore, India'
+  });
 
-  const renderSection = () => {
-    switch (activeSection) {
-      case 'Report':
-        return <Report />;
-      case 'Dashboard':
-      default:
-        return (
-          <div className="bg-white rounded-xl p-6 shadow-md">
-            <h2 className="text-2xl font-semibold text-blue-600 mb-4">📌 Dashboard Overview</h2>
-            <p className="text-gray-600">
-              Welcome to your user dashboard! Here you can view summaries, access reports, and monitor important updates.
-            </p>
-          </div>
-        );
-    }
+  const handleChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100 font-sans">
-      {/* Sidebar */}
-      <div className="w-full lg:w-64 bg-blue-500 text-white p-5 space-y-6">
-        <SidebarItem
-          icon={<FaTachometerAlt />}
-          label="Dashboard"
-          onClick={() => setActiveSection('Dashboard')}
-          isActive={activeSection === 'Dashboard'}
-        />
-        <SidebarItem
-          icon={<FaFileAlt />}
-          label="Report"
-          onClick={() => setActiveSection('Report')}
-          isActive={activeSection === 'Report'}
-        />
-      </div>
+  const toggleEdit = () => setEditMode(!editMode);
 
-      {/* Main Content */}
-      <div className="flex-1 p-4 md:p-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-          <h1 className="text-2xl font-semibold text-blue-600">{activeSection}</h1>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+  const disasterData = [
+    { time: '10AM', risk: 30 },
+    { time: '12PM', risk: 45 },
+    { time: '2PM', risk: 50 },
+    { time: '4PM', risk: 70 },
+    { time: '6PM', risk: 65 },
+  ];
+
+  return (
+    <div className="p-6 space-y-6 bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen">
+      <h1 className="text-3xl font-bold mb-4 text-gray-700">Disaster Management Dashboard</h1>
+
+      {/* User Profile */}
+      <div className="bg-white shadow-lg rounded-xl p-5 max-w-xl text-gray-700">
+        <div className="flex justify-between items-center mb-3 text-gray-700">
+          <h2 className="text-xl font-semibold text-gray-700">User Profile</h2>
+          <button
+            className="flex items-center gap-1 px-3 py-1 text-sm border rounded hover:bg-gray-100 text-gray-700"
+            onClick={toggleEdit}
+          >
+            {editMode ? <Save className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+            {editMode ? 'Save' : 'Edit'}
+          </button>
+        </div>
+        {['name', 'email', 'location'].map((field) => (
+          <div className="mb-3" key={field}>
+            <label className="block text-sm font-medium mb-1 capitalize text-gray-700">{field}</label>
             <input
-              type="text"
-              placeholder="Search..."
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-600"
-            />
-            <img
-              src="https://i.pravatar.cc/40?img=11"
-              alt="avatar"
-              className="w-10 h-10 rounded-full border-2 border-blue-400"
+              name={field}
+              className="w-full border px-3 py-2 rounded-md text-gray-700"
+              value={profile[field]}
+              onChange={handleChange}
+              disabled={!editMode}
             />
           </div>
-        </div>
+        ))}
+      </div>
 
-        {renderSection()}
+      {/* Real-time Monitoring */}
+      <div className="bg-white shadow-md rounded-xl p-5 text-gray-700">
+        <div className="flex items-center mb-3 text-red-600">
+          <AlertTriangle className="mr-2" />
+          <h2 className="text-xl font-semibold text-gray-700">Real-time Disaster Monitoring</h2>
+        </div>
+        <ul className="list-disc list-inside space-y-1 text-gray-700">
+          <li>Earthquake detected in Nepal - Magnitude 5.8</li>
+          <li>Flood warning issued in Assam</li>
+          <li>No alerts for South India</li>
+        </ul>
+      </div>
+
+      {/* Predictive Analytics */}
+      <div className="bg-white shadow-md rounded-xl p-5 text-gray-700">
+        <div className="flex items-center mb-3 text-blue-600">
+          <Activity className="mr-2" />
+          <h2 className="text-xl font-semibold text-gray-700">Predictive Analytics (Risk Graph)</h2>
+        </div>
+        <LineChart width={500} height={250} data={disasterData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="time" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="risk" stroke="#2563eb" strokeWidth={2} />
+        </LineChart>
+      </div>
+
+      {/* Emergency Services */}
+      <div className="text-gray-700 shadow-md rounded-xl p-5">
+        <div className="flex items-center mb-3 text-green-600">
+          <ShieldCheck className="mr-2" />
+          <h2 className="text-xl font-semibold text-gray-700">Emergency Services Coordination</h2>
+        </div>
+        <ul className="list-disc list-inside space-y-1 text-gray-700">
+          <li>Rescue teams dispatched to Bihar flood zone</li>
+          <li>Medical aid requested for Gujarat earthquake</li>
+          <li>Fire and ambulance units on standby in Delhi</li>
+        </ul>
       </div>
     </div>
   );
 };
 
 export default UserDashboard;
-
-
-
-
-
