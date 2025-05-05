@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { BsMoonStarsFill, BsSunFill } from "react-icons/bs";
 
-const Home = () => {
+const LandingPage = () => {
   const [disasterOpen, setDisasterOpen] = useState(false);
   const [learnOpen, setLearnOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() =>
@@ -37,7 +37,7 @@ const Home = () => {
           </div>
 
           <ul className="flex flex-wrap gap-4 sm:gap-6 items-center font-medium text-gray-700 dark:text-gray-200">
-            <li><Link to="/" className="hover:text-blue-600 dark:hover:text-blue-300">Home</Link></li>
+            <li><Link to="/home" className="hover:text-blue-600 dark:hover:text-blue-300">Home</Link></li>
 
             {/* Disaster Dropdown */}
             <li className="relative">
@@ -92,7 +92,6 @@ const Home = () => {
             </li>
 
             <li><Link to="/contact" className="hover:text-blue-600 dark:hover:text-blue-300">Contact</Link></li>
-           
             <li><Link to="/login" className="hover:text-blue-600 dark:hover:text-blue-300">Login</Link></li>
             <li><Link to="/signup" className="hover:text-blue-600 dark:hover:text-blue-300">Sign Up</Link></li>
 
@@ -148,7 +147,7 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default LandingPage;
 
 
 
