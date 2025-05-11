@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 
 const AdminPanel = () => {
   const navigate = useNavigate(); // Initialize useNavigate
-    const loggedInUser = useSelector((state) => state.auth.user);
+  const loggedInUser = useSelector((state) => state.auth.user);
 
   // State for documents
   const [documents, setDocuments] = useState([]);
@@ -38,58 +38,64 @@ const AdminPanel = () => {
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState({ ...profile });
-   const fetchData = async () => {
-      try {
-        console.log(loggedInUser?.accessToken)
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/getform`,{
-          headers:{
-                Authorization: `Bearer ${loggedInUser?.accessToken}`,
 
-          }
-        });
-        const fetchedDocuments = res?.data?.accountDetails; // Assuming the response is an array of document objects
-        console.log(res.data)
-
-        setDocuments(fetchedDocuments);
-
-
-
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
   useEffect(() => {
-    fetchData();
+    // Dummy data for documents
+    const dummyDocuments = [
+      {
+        id: "1",
+        fullName: "John Doe",
+        email: "john.doe@example.com",
+        phoneNumber: "123-456-7890",
+        status: "approved",
+      },
+      {
+        id: "2",
+        fullName: "Jane Smith",
+        email: "jane.smith@example.com",
+        phoneNumber: "987-654-3210",
+        status: "pending",
+      },
+      {
+        id: "3",
+        fullName: "Alice Johnson",
+        email: "alice.johnson@example.com",
+        phoneNumber: "555-555-5555",
+        status: "rejected",
+      },
+    ];
+
+    setDocuments(dummyDocuments);
+    setLoading(false);
   }, []);
-  
-  const handleDocumentAction = async(id, action) => {
+
+  const handleDocumentAction = async (id, action) => {
     setDocuments(
       documents.map((doc) => (doc.id === id ? { ...doc, status: action } : doc))
     );
-  
-     try {
-        const res = await axios.put(`${import.meta.env.VITE_BASE_URL}/status/${id}`,{action},{
-          headers:{
-                Authorization: `Bearer ${loggedInUser?.accessToken}`,
 
-          }
-        });
-        console.log(res.data)
-
-        if(res.data.success){
-          alert("User Status Changes Successfully")
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_BASE_URL}/status/${id}`,
+        { action },
+        {
+          headers: {
+            Authorization: `Bearer ${loggedInUser?.accessToken}`,
+          },
         }
+      );
+      console.log(res.data);
 
-        fetchData()
-
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-      } finally {
-        setLoading(false);
+      if (res.data.success) {
+        alert("User Status Changes Successfully");
       }
 
+      fetchData();
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle profile edit
@@ -124,11 +130,6 @@ const AdminPanel = () => {
       </span>
     );
   };
-
-  // Handle navigation to ResultPage
-  // const handleDocumentClick = (docId) => {
-  //   navigate(`/result/${docId}`); // Navigate to ResultPage with document ID
-  // };
 
   // Document List Component
   const DocumentsList = () => (
@@ -167,27 +168,21 @@ const AdminPanel = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {documents?.map((doc) => (
-                <tr
-                  key={doc.id}
-                  className="hover:bg-gray-50"
-                // onClick={() => handleDocumentClick(doc.id)} // Navigate on row click
-                >
+                <tr key={doc.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                       {doc.name}
+                        {doc.name}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                        {doc?.fullName}
+                          {doc?.fullName}
                         </div>
-                       
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    
-                     {doc?.email}
+                    {doc?.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {doc?.phoneNumber}
@@ -197,30 +192,34 @@ const AdminPanel = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      {
-                        doc?.status === 'approved' ? (
-                          <></>
-                        ) :  (
-  <button
-                        onClick={() => handleDocumentAction(doc._id, "approved")}
-                        disabled={doc.status === "approved"}
-                        className={`p-1 rounded-full ${doc.status === "approved"
-                          ? "bg-gray-100 text-gray-400"
-                          : "bg-green-100 text-green-600 hover:bg-green-200"
+                      {doc?.status === "approved" ? (
+                        <></>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            handleDocumentAction(doc._id, "approved")
+                          }
+                          disabled={doc.status === "approved"}
+                          className={`p-1 rounded-full ${
+                            doc.status === "approved"
+                              ? "bg-gray-100 text-gray-400"
+                              : "bg-green-100 text-green-600 hover:bg-green-200"
                           }`}
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
-                        )
-                      }
-                    
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      )}
+
                       <button
-                        onClick={() => handleDocumentAction(doc._id, "rejected")}
+                        onClick={() =>
+                          handleDocumentAction(doc._id, "rejected")
+                        }
                         disabled={doc.status === "rejected"}
-                        className={`p-1 rounded-full ${doc.status === "rejected"
-                          ? "bg-gray-100 text-gray-400"
-                          : "bg-red-100 text-red-600 hover:bg-red-200"
-                          }`}
+                        className={`p-1 rounded-full ${
+                          doc.status === "rejected"
+                            ? "bg-gray-100 text-gray-400"
+                            : "bg-red-100 text-red-600 hover:bg-red-200"
+                        }`}
                       >
                         <X className="h-4 w-4" />
                       </button>
@@ -265,11 +264,6 @@ const AdminPanel = () => {
       <div className="p-6 text-gray-600">
         <div className="flex items-start text-gray-600">
           <div className="flex-shrink-0 text-gray-600">
-            {/* <img 
-              src={profile.avatar} 
-              alt="Admin Avatar" 
-              className="h-20 w-20 rounded-full border-4 border-gray-200"
-            /> */}
             <img
               src={profile.avatar || "https://via.placeholder.com/150"} // Fallback image
               alt="Admin Avatar"
@@ -359,8 +353,9 @@ const AdminPanel = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div
-        className={`${sidebarOpen ? "w-64" : "w-16"
-          } bg-blue-800 text-white transition-all duration-300 ease-in-out flex flex-col`}
+        className={`${
+          sidebarOpen ? "w-64" : "w-16"
+        } bg-blue-800 text-white transition-all duration-300 ease-in-out flex flex-col`}
       >
         <div className="p-4 border-b border-blue-700 flex items-center justify-between">
           {sidebarOpen && (
@@ -378,10 +373,11 @@ const AdminPanel = () => {
           <nav className="px-2 space-y-1">
             <button
               onClick={() => setActiveTab("documents")}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === "documents"
-                ? "bg-blue-700 text-white"
-                : "text-blue-100 hover:bg-blue-700"
-                }`}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
+                activeTab === "documents"
+                  ? "bg-blue-700 text-white"
+                  : "text-blue-100 hover:bg-blue-700"
+              }`}
             >
               <FileText
                 className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`}
@@ -391,10 +387,11 @@ const AdminPanel = () => {
 
             <button
               onClick={() => setActiveTab("profile")}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === "profile"
-                ? "bg-blue-700 text-white"
-                : "text-blue-100 hover:bg-blue-700"
-                }`}
+              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
+                activeTab === "profile"
+                  ? "bg-blue-700 text-white"
+                  : "text-blue-100 hover:bg-blue-700"
+              }`}
             >
               <User className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
               {sidebarOpen && <span>Profile</span>}
@@ -411,8 +408,9 @@ const AdminPanel = () => {
 
         <div className="p-4 border-t border-blue-700">
           <button
-            className={`flex items-center text-sm font-medium text-blue-100 hover:text-white ${sidebarOpen ? "w-full" : "mx-auto"
-              }`}
+            className={`flex items-center text-sm font-medium text-blue-100 hover:text-white ${
+              sidebarOpen ? "w-full" : "mx-auto"
+            }`}
           >
             <LogOut className={`h-5 w-5 ${sidebarOpen ? "mr-2" : ""}`} />
             {sidebarOpen && <span>Log out</span>}
