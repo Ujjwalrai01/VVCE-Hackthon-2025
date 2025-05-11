@@ -52,9 +52,9 @@ const ResultPage = () => {
   }, [docId]);
   // Sample admin profile data
   const [adminProfile, setAdminProfile] = useState({
-    name: "Alex Johnson",
+    name: "Ujjwal rai",
     role: "System Administrator",
-    email: "alex.johnson@company.com",
+    email: "ujjwal@company.com",
     department: "IT Operations",
     joinDate: "2023-01-15",
   });
@@ -68,19 +68,19 @@ const ResultPage = () => {
 
   // Sample bank account data
   const [bankAccount, setBankAccount] = useState({
-    fullName: "Rahul Sharma",
-    fatherName: "Vikram Sharma",
-    dateOfBirth: "1990-05-15",
+    fullName: "Ujjwal Rai",
+    fatherName: "Krishna Rai",
+    dateOfBirth: "2005-06-22",
     gender: "Male",
-    email: "rahul.sharma@example.com",
-    phoneNumber: "+91 9876543210",
+    email: "ujjwal@example.com",
+    phoneNumber: "+91 9875543210",
     phoneVerified: true,
     emailVerified: true,
     address: {
-      street: "123 Park Avenue",
-      city: "Mumbai",
-      state: "Maharashtra",
-      postalCode: "400001",
+      street: "Bettiah Main Road",
+      city: "Bettiah",
+      state: "bihar",
+      postalCode: "4844949",
       country: "India",
     },
     aadhaarNumber: "XXXX-XXXX-1234",
@@ -94,7 +94,7 @@ const ResultPage = () => {
     accountType: "Savings",
     occupation: "Software Engineer",
     annualIncome: 1200000,
-    nomineeName: "Priya Sharma",
+    nomineeName: "Not Found",
     nomineeRelation: "Spouse",
     createdAt: "2024-01-10T10:30:00.000Z",
     status: "approved",
