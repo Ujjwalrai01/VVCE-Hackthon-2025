@@ -1,39 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  FileText, 
-  Upload, 
-  User, 
-  Settings, 
-  Menu, 
-  LogOut, 
-  Edit, 
-  Save, 
-  ChevronRight, 
-  MoreVertical, 
-  X, 
-  Download, 
-  PlusCircle, 
-  Clock, 
-  CheckCircle, 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FileText,
+  Upload,
+  User,
+  Settings,
+  Menu,
+  LogOut,
+  Edit,
+  Save,
+  ChevronRight,
+  MoreVertical,
+  X,
+  Download,
+  PlusCircle,
+  Clock,
+  CheckCircle,
   XCircle,
-  BarChart,
+  BarChart2,
   Bell,
-  Search
-} from 'lucide-react';
+  Search,
+  Home,
+  Calendar,
+  HelpCircle,
+  Shield,
+  Folder,
+  TrendingUp,
+  MessageSquare,
+  Users,
+  AlertTriangle,
+} from "lucide-react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+import axios from "axios";
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
+  
+
+  const handleDocumentClick = (docId) => {
+    navigate(`/result/${docId}`); // Navigate to ResultPage with document ID
+  };
+  
+
+  {
+    /* Sidebar */
+  }
+  <div
+    className={`${
+      sidebarOpen ? "w-64" : "w-16"
+    } bg-indigo-700 text-white transition-all duration-300 ease-in-out flex flex-col`}
+  >
+    {/* Sidebar Header */}
+    <div className="p-4 border-b border-indigo-600 flex items-center justify-between">
+      {sidebarOpen && (
+        <span className="font-bold text-lg">Document Portal</span>
+      )}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="p-1 rounded-md hover:bg-indigo-600"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+    </div>
+
+    {/* Sidebar Navigation */}
+    <div className="flex-1 py-4">
+      <nav className="px-2 space-y-1">
+        <button
+          onClick={() => setActiveTab("documents")}
+          className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
+            activeTab === "documents"
+              ? "bg-indigo-800 text-white"
+              : "text-indigo-100 hover:bg-indigo-600"
+          }`}
+        >
+          <FileText className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
+          {sidebarOpen && <span>Documents</span>}
+        </button>
+
+        <button
+          onClick={() => setActiveTab("profile")}
+          className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${
+            activeTab === "profile"
+              ? "bg-indigo-800 text-white"
+              : "text-indigo-100 hover:bg-indigo-600"
+          }`}
+        >
+          <User className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
+          {sidebarOpen && <span>Profile</span>}
+        </button>
+
+        <button className="flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-indigo-100 hover:bg-indigo-600">
+          <BarChart className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
+          {sidebarOpen && <span>Analytics</span>}
+        </button>
+
+        <button className="flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-indigo-100 hover:bg-indigo-600">
+          <Settings className={`h-5 w-5 ${sidebarOpen ? "mr-3" : "mx-auto"}`} />
+          {sidebarOpen && <span>Settings</span>}
+        </button>
+      </nav>
+    </div>
+
+    {/* Sidebar Footer */}
+    <div className="p-4 border-t border-indigo-600">
+      <button
+        className={`flex items-center text-sm font-medium text-indigo-100 hover:text-white ${
+          sidebarOpen ? "w-full" : "mx-auto"
+        }`}
+      >
+        <LogOut className={`h-5 w-5 ${sidebarOpen ? "mr-2" : ""}`} />
+        {sidebarOpen && <span>Log out</span>}
+      </button>
+    </div>
+  </div>;
+
   // State management
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('documents');
+  const [activeTab, setActiveTab] = useState("documents");
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [notifications, setNotifications] = useState(3);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  
+  const [showNotifications, setShowNotifications] = useState(false);
+
   // User profile state
   const [profile, setProfile] = useState({
     name: "Ujjwal Rai",
@@ -41,28 +149,87 @@ const DashboardPage = () => {
     role: "Student",
     avatar: "/api/placeholder/80/80",
     department: "ID Verify",
-    joinedDate: "Jan 15, 2024"
+    joinedDate: "Jan 15, 2024",
   });
-  
+
   const [editingProfile, setEditingProfile] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({...profile});
+  const [editedProfile, setEditedProfile] = useState({ ...profile });
+
+  // Chart data
+  const documentsByStatusData = [
+    { name: "Approved", value: 0, color: "#10B981" },
+    { name: "Pending", value: 0, color: "#F59E0B" },
+    { name: "Rejected", value: 0, color: "#EF4444" },
+  ];
+
+  const documentsByTypeData = [
+    { name: "PDF", value: 0, color: "#6366F1" },
+    { name: "DOCX", value: 0, color: "#8B5CF6" },
+    { name: "XLSX", value: 0, color: "#3B82F6" },
+  ];
+
+  const documentsTimelineData = [
+    { name: "Apr 20", uploads: 3, approvals: 2 },
+    { name: "Apr 25", uploads: 4, approvals: 3 },
+    { name: "Apr 30", uploads: 2, approvals: 1 },
+    { name: "May 02", uploads: 5, approvals: 3 },
+    { name: "May 05", uploads: 3, approvals: 2 },
+    { name: "May 08", uploads: 7, approvals: 4 },
+  ];
+
+  // Mock notification data
+  const notificationItems = [
+    {
+      id: 1,
+      title: "Document approved",
+      message: '"Q1 Expense Report.pdf" has been approved',
+      time: "15 minutes ago",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "New comment",
+      message: 'Your supervisor left a comment on "Project Timeline.xlsx"',
+      time: "1 hour ago",
+      read: false,
+    },
+    {
+      id: 3,
+      title: "Document rejected",
+      message: 'Your document "Training Documentation.pdf" needs revision',
+      time: "3 hours ago",
+      read: false,
+    },
+    {
+      id: 4,
+      title: "System maintenance",
+      message: "The portal will be down for maintenance tonight at 11 PM",
+      time: "1 day ago",
+      read: true,
+    },
+  ];
 
   // Mock data for documents
-  useEffect(() => {
-    // Simulate API call to fetch documents
-    setTimeout(() => {
-      setDocuments([
-        { id: 1, name: "Q1 Expense Report.pdf", type: "PDF", size: "2.4 MB", status: "approved", uploadDate: "2025-04-28", comments: "Approved by finance team" },
-        { id: 2, name: "Client Proposal - XYZ Corp.docx", type: "DOCX", size: "1.7 MB", status: "pending", uploadDate: "2025-05-01", comments: null },
-        { id: 3, name: "Department Budget 2025.xlsx", type: "XLSX", size: "3.8 MB", status: "rejected", uploadDate: "2025-04-29", comments: "Please revise figures in section 3" },
-        { id: 4, name: "Team Meeting Minutes.pdf", type: "PDF", size: "0.9 MB", status: "approved", uploadDate: "2025-04-25", comments: null },
-        { id: 5, name: "Project Timeline.xlsx", type: "XLSX", size: "1.2 MB", status: "pending", uploadDate: "2025-05-02", comments: null },
-        { id: 6, name: "Market Research Data.pdf", type: "PDF", size: "5.6 MB", status: "approved", uploadDate: "2025-04-22", comments: "Great insights, please share with the team" },
-        { id: 7, name: "Training Documentation.pdf", type: "PDF", size: "4.3 MB", status: "rejected", uploadDate: "2025-04-18", comments: "Need to include updated protocols" },
-      ]);
+ useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/getform`);
+      const fetchedDocuments = res.data; // Assuming the response is an array of document objects
+
+      setDocuments(fetchedDocuments);
+
+    
+
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  fetchData();
+}, []);
+
 
   // Handle file selection
   const handleFileSelect = (e) => {
@@ -74,13 +241,13 @@ const DashboardPage = () => {
   // Handle file upload
   const handleFileUpload = () => {
     if (!selectedFile) return;
-    
+
     setUploading(true);
     setUploadProgress(0);
-    
+
     // Simulate upload progress
     const interval = setInterval(() => {
-      setUploadProgress(prev => {
+      setUploadProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval);
           simulateUploadComplete();
@@ -97,13 +264,13 @@ const DashboardPage = () => {
       const newDoc = {
         id: documents.length + 1,
         name: selectedFile.name,
-        type: selectedFile.name.split('.').pop().toUpperCase(),
+        type: selectedFile.name.split(".").pop().toUpperCase(),
         size: `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB`,
         status: "pending",
-        uploadDate: new Date().toISOString().split('T')[0],
-        comments: null
+        uploadDate: new Date().toISOString().split("T")[0],
+        comments: null,
       };
-      
+
       setDocuments([newDoc, ...documents]);
       setUploading(false);
       setSelectedFile(null);
@@ -112,47 +279,49 @@ const DashboardPage = () => {
   };
 
   // Filter documents based on search term
-  const filteredDocuments = documents.filter(doc => 
+  const filteredDocuments = documents.filter((doc) =>
     doc.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Handle profile edit
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
-    setEditedProfile(prev => ({...prev, [name]: value}));
+    setEditedProfile((prev) => ({ ...prev, [name]: value }));
   };
 
   const saveProfile = () => {
-    setProfile({...editedProfile});
+    setProfile({ ...editedProfile });
     setEditingProfile(false);
   };
 
   // Status badge component
   const StatusBadge = ({ status }) => {
     const getStatusStyles = () => {
-      switch(status) {
-        case 'approved':
-          return 'bg-green-100 text-green-800 border-green-200';
-        case 'rejected':
-          return 'bg-red-100 text-red-800 border-red-200';
+      switch (status) {
+        case "approved":
+          return "bg-green-100 text-green-800 border-green-300";
+        case "rejected":
+          return "bg-red-100 text-red-800 border-red-300";
         default:
-          return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+          return "bg-yellow-100 text-yellow-800 border-yellow-300";
       }
     };
-    
+
     const getStatusIcon = () => {
-      switch(status) {
-        case 'approved':
+      switch (status) {
+        case "approved":
           return <CheckCircle className="h-3 w-3 mr-1" />;
-        case 'rejected':
+        case "rejected":
           return <XCircle className="h-3 w-3 mr-1" />;
         default:
           return <Clock className="h-3 w-3 mr-1" />;
       }
     };
-    
+
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center border ${getStatusStyles()}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium flex items-center border ${getStatusStyles()}`}
+      >
         {getStatusIcon()}
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
@@ -161,80 +330,99 @@ const DashboardPage = () => {
 
   // Document Upload Modal
   const UploadModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 border border-gray-200">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-900">Upload Document</h3>
-          <button 
+          <h3 className="text-lg font-semibold text-gray-900">
+            Upload Document
+          </h3>
+          <button
             onClick={() => setShowUploadModal(false)}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-full p-1"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         {uploading ? (
           <div className="space-y-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-gray-700">Uploading...</span>
-              <span className="text-sm font-medium text-gray-700">{uploadProgress}%</span>
+              <span className="text-sm font-medium text-gray-700">
+                Uploading...
+              </span>
+              <span className="text-sm font-medium text-indigo-600">
+                {uploadProgress}%
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div 
-                className="bg-blue-600 h-2.5 rounded-full" 
+              <div
+                className="bg-indigo-600 h-2.5 rounded-full"
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">Please don't close this window until upload is complete.</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Please don't close this window until upload is complete.
+            </p>
           </div>
         ) : (
           <>
             <div className="space-y-6">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-all">
+              <div className="border-2 border-dashed border-indigo-300 rounded-lg p-6 text-center hover:border-indigo-500 transition-all bg-indigo-50 bg-opacity-40">
                 {selectedFile ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-center">
-                      <FileText className="h-10 w-10 text-blue-500" />
+                      <FileText className="h-12 w-12 text-indigo-600" />
                     </div>
-                    <p className="text-sm font-medium text-gray-900">{selectedFile.name}</p>
-                    <p className="text-xs text-gray-500">{(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
-                    <button 
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                    <button
                       onClick={() => setSelectedFile(null)}
-                      className="text-xs text-red-600 hover:text-red-800"
+                      className="text-xs text-red-600 hover:text-red-800 font-medium flex items-center justify-center"
                     >
+                      <X className="h-3 w-3 mr-1" />
                       Remove
                     </button>
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center justify-center">
-                      <Upload className="h-10 w-10 text-gray-400" />
+                      <Upload className="h-12 w-12 text-indigo-500 opacity-80" />
                     </div>
-                    <p className="mt-2 text-sm font-medium text-gray-900">Drag and drop your file here</p>
+                    <p className="mt-2 text-sm font-medium text-gray-900">
+                      Drag and drop your file here
+                    </p>
                     <p className="mt-1 text-xs text-gray-500">Or</p>
-                    <label className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer">
+                    <label className="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer">
                       Browse Files
-                      <input 
-                        type="file" 
-                        className="hidden" 
+                      <input
+                        type="file"
+                        className="hidden"
                         onChange={handleFileSelect}
                       />
                     </label>
-                    <p className="mt-1 text-xs text-gray-500">Supported formats: PDF, DOCX, XLSX, PNG, JPG</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Supported formats: PDF, DOCX, XLSX, PNG, JPG
+                    </p>
                   </>
                 )}
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">Document Description (Optional)</label>
-                <textarea 
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border text-gray-600"
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Document Description (Optional)
+                </label>
+                <textarea
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border bg-gray-50"
                   rows="3"
                   placeholder="Add a brief description of this document..."
                 ></textarea>
               </div>
             </div>
-            
+
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={() => setShowUploadModal(false)}
@@ -245,7 +433,11 @@ const DashboardPage = () => {
               <button
                 onClick={handleFileUpload}
                 disabled={!selectedFile}
-                className={`px-4 py-2 rounded-md text-sm font-medium text-white ${selectedFile ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-300 cursor-not-allowed'}`}
+                className={`px-4 py-2 rounded-md text-sm font-medium text-white ${
+                  selectedFile
+                    ? "bg-indigo-600 hover:bg-indigo-700"
+                    : "bg-indigo-300 cursor-not-allowed"
+                }`}
               >
                 Upload
               </button>
@@ -256,61 +448,303 @@ const DashboardPage = () => {
     </div>
   );
 
+  // Notification dropdown
+  const NotificationDropdown = () => (
+    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-1 z-10 border border-gray-200">
+      <div className="px-4 py-2 border-b border-gray-200">
+        <div className="flex justify-between items-center">
+          <h3 className="font-medium text-gray-900">Notifications</h3>
+          <span className="text-xs text-indigo-600 font-medium cursor-pointer hover:text-indigo-800">
+            Mark all as read
+          </span>
+        </div>
+      </div>
+      <div className="max-h-96 overflow-y-auto">
+        {notificationItems.map((notification) => (
+          <div
+            key={notification.id}
+            className={`px-4 py-3 hover:bg-gray-50 border-l-4 ${
+              notification.read ? "border-transparent" : "border-indigo-500"
+            }`}
+          >
+            <div className="flex justify-between">
+              <p className="text-sm font-medium text-gray-900">
+                {notification.title}
+              </p>
+              <span className="text-xs text-gray-500">{notification.time}</span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">{notification.message}</p>
+          </div>
+        ))}
+      </div>
+      <div className="px-4 py-2 border-t border-gray-200">
+        <button className="text-sm text-indigo-600 hover:text-indigo-800 font-medium w-full text-center">
+          View all notifications
+        </button>
+      </div>
+    </div>
+  );
+
+  // Analytics Tab Component
+  const AnalyticsTab = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Document Status Distribution */}
+        <div className="bg-white rounded-xl shadow p-6 col-span-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Document Status
+          </h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={documentsByStatusData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {documentsByStatusData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) => [`${value} documents`, "Count"]}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Document Type Distribution */}
+        <div className="bg-white rounded-xl shadow p-6 col-span-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Document Types
+          </h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={documentsByTypeData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip
+                  formatter={(value) => [`${value} documents`, "Count"]}
+                />
+                <Bar dataKey="value" name="Documents">
+                  {documentsByTypeData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Document Timeline */}
+        <div className="bg-white rounded-xl shadow p-6 col-span-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Activity Timeline
+          </h3>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={documentsTimelineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="uploads"
+                  stroke="#6366F1"
+                  name="Uploads"
+                  strokeWidth={2}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="approvals"
+                  stroke="#10B981"
+                  name="Approvals"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Document Activity Summary */}
+      <div className="bg-white rounded-xl shadow overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Document Activity Summary
+          </h3>
+        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-indigo-50 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-indigo-100 text-indigo-600">
+                  <FileText className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Total Documents
+                  </h4>
+                  <p className="text-2xl font-bold text-indigo-700">
+                    {documents.length}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-indigo-600">
+                <span className="font-medium">+23%</span> from last month
+              </div>
+            </div>
+
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-green-100 text-green-600">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Approved
+                  </h4>
+                  <p className="text-2xl font-bold text-green-700">
+                    {documents.filter((d) => d.status === "approved").length}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-green-600">
+                <span className="font-medium">+18%</span> from last month
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                  <Clock className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-sm font-medium text-gray-500">Pending</h4>
+                  <p className="text-2xl font-bold text-yellow-700">
+                    {documents.filter((d) => d.status === "pending").length}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-yellow-600">
+                <span className="font-medium">+5%</span> from last month
+              </div>
+            </div>
+
+            <div className="bg-red-50 rounded-lg p-4">
+              <div className="flex items-center">
+                <div className="p-3 rounded-full bg-red-100 text-red-600">
+                  <XCircle className="h-6 w-6" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-sm font-medium text-gray-500">
+                    Rejected
+                  </h4>
+                  <p className="text-2xl font-bold text-red-700">
+                    {documents.filter((d) => d.status === "rejected").length}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 text-xs text-red-600">
+                <span className="font-medium">-10%</span> from last month
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   // Documents Tab Component
   const DocumentsTab = () => (
     <div className="space-y-6">
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl shadow p-6 text-white">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-green-100 text-green-600">
-              <CheckCircle className="h-6 w-6" />
+            <div className="p-3 rounded-full bg-white bg-opacity-25 text-white">
+              <CheckCircle className="h-8 w-8" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Approved Documents</h3>
-              <p className="text-2xl font-semibold text-gray-900">{documents.filter(d => d.status === 'approved').length}</p>
+              <h3 className="text-sm font-medium text-white text-opacity-90">
+                Approved Documents
+              </h3>
+              <p className="text-3xl font-bold">
+                {documents.filter((d) => d.status === "approved").length}
+              </p>
             </div>
           </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center">
-            <div className="p-3 rounded-full bg-yellow-100 text-yellow-600">
-              <Clock className="h-6 w-6" />
-            </div>
-            <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Pending Documents</h3>
-              <p className="text-2xl font-semibold text-gray-900">{documents.filter(d => d.status === 'pending').length}</p>
-            </div>
+          <div className="mt-4 text-sm text-white text-opacity-90">
+            <span className="font-medium">+18%</span> from last month
           </div>
         </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
+
+        <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-xl shadow p-6 text-white">
           <div className="flex items-center">
-            <div className="p-3 rounded-full bg-red-100 text-red-600">
-              <XCircle className="h-6 w-6" />
+            <div className="p-3 rounded-full bg-white bg-opacity-25 text-white">
+              <Clock className="h-8 w-8" />
             </div>
             <div className="ml-4">
-              <h3 className="text-sm font-medium text-gray-500">Rejected Documents</h3>
-              <p className="text-2xl font-semibold text-gray-900">{documents.filter(d => d.status === 'rejected').length}</p>
+              <h3 className="text-sm font-medium text-white text-opacity-90">
+                Pending Documents
+              </h3>
+              <p className="text-3xl font-bold">
+                {documents.filter((d) => d.status === "pending").length}
+              </p>
             </div>
+          </div>
+          <div className="mt-4 text-sm text-white text-opacity-90">
+            <span className="font-medium">+5%</span> from last month
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-red-400 to-red-500 rounded-xl shadow p-6 text-white">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-white bg-opacity-25 text-white">
+              <XCircle className="h-8 w-8" />
+            </div>
+            <div className="ml-4">
+              <h3 className="text-sm font-medium text-white text-opacity-90">
+                Rejected Documents
+              </h3>
+              <p className="text-3xl font-bold">
+                {documents.filter((d) => d.status === "rejected").length}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 text-sm text-white text-opacity-90">
+            <span className="font-medium">-10%</span> from last month
           </div>
         </div>
       </div>
-      
+
       {/* Documents Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-xl shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900">Your Documents</h3>
-          <button 
+          <h3 className="text-lg font-semibold text-gray-900">
+            Your Documents
+          </h3>
+          <button
             onClick={() => setShowUploadModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 transition-colors"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             Upload New
           </button>
         </div>
-        
+
         <div className="px-6 py-4 border-b border-gray-200 bg-white">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -318,30 +752,34 @@ const DashboardPage = () => {
             </div>
             <input
               type="text"
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-500"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               placeholder="Search documents..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
         </div>
-        
+
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
           </div>
         ) : filteredDocuments.length === 0 ? (
           <div className="text-center py-12">
             <FileText className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No documents found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No documents found
+            </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? "Try adjusting your search term." : "Get started by uploading a new document."}
+              {searchTerm
+                ? "Try adjusting your search term."
+                : "Get started by uploading a new document."}
             </p>
             {!searchTerm && (
               <div className="mt-6">
                 <button
                   onClick={() => setShowUploadModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
                 >
                   <Upload className="h-4 w-4 mr-2" />
                   Upload Document
@@ -354,40 +792,59 @@ const DashboardPage = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Upload Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredDocuments.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-gray-50">
+                  <tr key={doc.id} 
+                      className="hover:bg-gray-50"
+                      onClick={() => handleDocumentClick(doc.id)}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center">
                           <FileText className="h-5 w-5 text-gray-500" />
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{doc.name}</div>
-                          <div className="text-sm text-gray-500">{doc.type} • {doc.size}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {doc.name}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {doc.type} • {doc.size}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{doc.uploadDate}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {doc.uploadDate}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <StatusBadge status={doc.status} />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {doc.comments || "-"}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex space-x-2">
-                        <button className="p-1 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200">
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex space-x-2 justify-end">
+                        <button
+                          className="p-2 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200"
+                          aria-label="View Document"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleDocumentClick(doc.id);
+                          }}
+                        >
                           <FileText className="h-4 w-4" />
                         </button>
-                        <button className="p-1 rounded-full bg-green-100 text-green-600 hover:bg-green-200">
+                        <button
+                          className="p-2 rounded-full bg-green-100 text-green-600 hover:bg-green-200"
+                          aria-label="Download Document"
+                        >
                           <Download className="h-4 w-4" />
                         </button>
                       </div>
@@ -402,291 +859,62 @@ const DashboardPage = () => {
     </div>
   );
 
-  // Profile Tab Component
-  const ProfileTab = () => (
-    <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-        <h3 className="text-lg font-medium text-gray-900">Your Profile</h3>
-        {!editingProfile ? (
-          <button 
-            onClick={() => setEditingProfile(true)}
-            className="flex items-center text-sm px-3 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100"
-          >
-            <Edit className="h-4 w-4 mr-1" />
-            Edit Profile
-          </button>
-        ) : (
-          <button 
-            onClick={saveProfile}
-            className="flex items-center text-sm px-3 py-1 rounded-md bg-green-50 text-green-600 hover:bg-green-100"
-          >
-            <Save className="h-4 w-4 mr-1" />
-            Save Changes
-          </button>
-        )}
-      </div>
-      
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row md:items-start">
-          <div className="flex-shrink-0 flex flex-col items-center">
-            <img 
-              src={profile.avatar} 
-              alt="User Avatar" 
-              className="h-32 w-32 rounded-full border-4 border-gray-200"
-            />
-            {!editingProfile && (
-              <div className="mt-4 flex justify-center">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {profile.role}
-                </span>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-6 md:mt-0 md:ml-6 flex-1 text-gray-600">
-            {editingProfile ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={editedProfile.name}
-                    onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={editedProfile.email}
-                    onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Role</label>
-                  <input
-                    type="text"
-                    name="role"
-                    value={editedProfile.role}
-                    onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Department</label>
-                  <input
-                    type="text"
-                    name="department"
-                    value={editedProfile.department}
-                    onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                  />
-                </div>
-                
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Profile Picture URL</label>
-                  <input
-                    type="text"
-                    name="avatar"
-                    value={editedProfile.avatar}
-                    onChange={handleProfileChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                  />
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-500">FULL NAME</h4>
-                    <p className="mt-1 text-base font-medium text-gray-900">{profile.name}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-500">EMAIL ADDRESS</h4>
-                    <p className="mt-1 text-base text-gray-900">{profile.email}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-500">DEPARTMENT</h4>
-                    <p className="mt-1 text-base text-gray-900">{profile.department}</p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-500">JOINED DATE</h4>
-                    <p className="mt-1 text-base text-gray-900">{profile.joinedDate}</p>
-                  </div>
-                </div>
-                
-                <div className="mt-8 border-t border-gray-200 pt-6">
-                  <h4 className="font-medium text-gray-900">Document Activity</h4>
-                  <div className="mt-4 flex items-center justify-between text-sm">
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Total Documents</span>
-                      <span className="font-medium text-gray-900 text-lg">{documents.length}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Approved</span>
-                      <span className="font-medium text-green-600 text-lg">{documents.filter(d => d.status === 'approved').length}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Pending</span>
-                      <span className="font-medium text-yellow-600 text-lg">{documents.filter(d => d.status === 'pending').length}</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-gray-500">Rejected</span>
-                      <span className="font-medium text-red-600 text-lg">{documents.filter(d => d.status === 'rejected').length}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-indigo-700 text-white transition-all duration-300 ease-in-out flex flex-col`}>
-        <div className="p-4 border-b border-indigo-600 flex items-center justify-between">
-          {sidebarOpen && <span className="font-bold text-lg">Document Portal</span>}
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)} 
-            className="p-1 rounded-md hover:bg-indigo-600"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-        </div>
-        
-        <div className="flex-1 py-4">
-          <nav className="px-2 space-y-1">
-            <button 
-              onClick={() => setActiveTab('documents')}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'documents' ? 'bg-indigo-800 text-white' : 'text-indigo-100 hover:bg-indigo-600'}`}
-            >
-              <FileText className={`h-5 w-5 ${sidebarOpen ? 'mr-3' : 'mx-auto'}`} />
-              {sidebarOpen && <span>Documents</span>}
-            </button>
-            
-            <button 
-              onClick={() => setActiveTab('profile')}
-              className={`flex items-center px-3 py-2 text-sm font-medium rounded-md w-full ${activeTab === 'profile' ? 'bg-indigo-800 text-white' : 'text-indigo-100 hover:bg-indigo-600'}`}
-            >
-              <User className={`h-5 w-5 ${sidebarOpen ? 'mr-3' : 'mx-auto'}`} />
-              {sidebarOpen && <span>Profile</span>}
-            </button>
-            
-            <button 
-              className="flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-indigo-100 hover:bg-indigo-600"
-            >
-              <BarChart className={`h-5 w-5 ${sidebarOpen ? 'mr-3' : 'mx-auto'}`} />
-              {sidebarOpen && <span>Analytics</span>}
-            </button>
-            
-            <button 
-              className="flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-indigo-100 hover:bg-indigo-600"
-            >
-              <Settings className={`h-5 w-5 ${sidebarOpen ? 'mr-3' : 'mx-auto'}`} />
-              {sidebarOpen && <span>Settings</span>}
-            </button>
-          </nav>
-        </div>
-        
-        <div className="p-4 border-t border-indigo-600">
-          <button className={`flex items-center text-sm font-medium text-indigo-100 hover:text-white ${sidebarOpen ? 'w-full' : 'mx-auto'}`}>
-            <LogOut className={`h-5 w-5 ${sidebarOpen ? 'mr-2' : ''}`} />
-            {sidebarOpen && <span>Log out</span>}
-          </button>
-        </div>
+      <div
+        className={`${
+          sidebarOpen ? "w-64" : "w-16"
+        } bg-indigo-700 text-white transition-all duration-300 ease-in-out flex flex-col`}
+      >
+        {/* Sidebar content */}
+        {/* Add your sidebar content here */}
       </div>
-      
+
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-white shadow">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                {activeTab === 'documents' ? 'My Documents' : 'User Profile'}
-              </h1>
-            </div>
-            
+            <h1 className="text-xl font-semibold text-gray-900">
+              {activeTab === "documents" ? "My Documents" : "User Profile"}
+            </h1>
             <div className="flex items-center space-x-4">
-              <div className="relative">
-                <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-100">
-                  <Bell className="h-6 w-6" />
-                  {notifications > 0 && (
-                    <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-xs text-white text-center">
-                      {notifications}
-                    </span>
-                  )}
-                </button>
-              </div>
-              
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 rounded-full bg-gray-100 hover:bg-gray-200"
+                aria-label="Notifications"
+              >
+                <Bell className="h-6 w-6 text-gray-600" />
+                {notifications > 0 && (
+                  <span className="absolute top-0 right-0 block h-4 w-4 rounded-full bg-red-500 text-xs text-white text-center">
+                    {notifications}
+                  </span>
+                )}
+              </button>
               <div className="relative">
                 <button className="flex items-center text-sm focus:outline-none">
-                  <img 
-                    src={profile.avatar} 
-                    alt="User Avatar" 
+                  <img
+                    src={profile.avatar}
+                    alt="User Avatar"
                     className="h-8 w-8 rounded-full"
                   />
-                  <span className="ml-2 text-gray-700 hidden sm:block">{profile.name}</span>
+                  <span className="ml-2 text-gray-700 hidden sm:block">
+                    {profile.name}
+                  </span>
                   <ChevronRight className="ml-1 h-4 w-4 text-gray-400" />
                 </button>
               </div>
             </div>
           </div>
         </header>
-        
+
         {/* Main content area */}
         <main className="flex-1 overflow-auto bg-gray-100 p-6">
-          {activeTab === 'documents' ? <DocumentsTab /> : <ProfileTab />}
+          {activeTab === "documents" ? <DocumentsTab /> : <ProfileTab />}
         </main>
       </div>
-      
-      {/* Floating Action Button */}
-      <div className="fixed bottom-8 right-8">
-        <div className="relative group">
-          <button className="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus:outline-none">
-            <MoreVertical className="h-6 w-6" />
-          </button>
-          
-          <div className="absolute bottom-16 right-0 hidden group-hover:block">
-            <div className="bg-white rounded-lg shadow-lg py-2 w-48 overflow-auto max-h-64">
-              <button 
-                onClick={() => setShowUploadModal(true)}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Document
-              </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                <User className="h-4 w-4 mr-2" />
-                Edit Profile
-              </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications ({notifications})
-              </button>
-              <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
-                <Settings className="h-4 w-4 mr-2" />
-                Account Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
+
       {/* Upload Modal */}
       {showUploadModal && <UploadModal />}
     </div>
