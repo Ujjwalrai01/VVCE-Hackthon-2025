@@ -6,3 +6,33 @@
   text-align: center;
 }
 
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.dashboard-header {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.dashboard-body {
+  display: flex;
+  flex: 1;
+}
+
+.dashboard-sidebar {
+  width: 20%;
+  background-color: #f1f1f1;
+  padding: 1rem;
+  border-right: 1px solid #ddd;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
